@@ -1,0 +1,80 @@
+[gd_scene load_steps=12 format=3 uid="uid://baabxwanep5rt"]
+
+[ext_resource type="Script" path="res://Player/Scripts/player_movement.gd" id="1_7qiwa"]
+[ext_resource type="Script" path="res://Player/Scripts/player.gd" id="1_f3b5m"]
+[ext_resource type="Script" path="res://Player/Scripts/player_input.gd" id="2_bao8f"]
+[ext_resource type="Script" path="res://Player/Scripts/States/player_states_script.gd" id="3_1vejr"]
+[ext_resource type="Script" path="res://Player/Scripts/States/player_grounded.gd" id="4_mybht"]
+[ext_resource type="Script" path="res://Player/Scripts/States/player_airborne.gd" id="5_8owo5"]
+[ext_resource type="Script" path="res://Player/player_camera.gd" id="7_nbghw"]
+[ext_resource type="Script" path="res://Player/player_platform_drop.gd" id="8_rblar"]
+
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_2tvk3"]
+size = Vector2(50, 100)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ns2go"]
+size = Vector2(50, 100)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_jvj1l"]
+size = Vector2(40, 89)
+
+[node name="Player" type="CharacterBody2D"]
+scale = Vector2(0.25, 0.25)
+collision_mask = 6
+script = ExtResource("1_f3b5m")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = SubResource("PlaceholderTexture2D_2tvk3")
+
+[node name="CollisionBox" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_ns2go")
+debug_color = Color(1, 1, 1, 0.42)
+
+[node name="Components" type="Node" parent="."]
+
+[node name="PlayerMovementComponent" type="Node2D" parent="Components"]
+script = ExtResource("1_7qiwa")
+h_deceleration = 1000.0
+h_acceleration = 130.0
+max_h_speed = 140.0
+gravity = 25.0
+cut_jump_velocity = -100.0
+
+[node name="PlayerInputComponent" type="Node" parent="Components" node_paths=PackedStringArray("movement_component", "camera_component", "platform_component")]
+script = ExtResource("2_bao8f")
+movement_component = NodePath("../PlayerMovementComponent")
+camera_component = NodePath("../PlayerCameraComponent")
+platform_component = NodePath("../PlayerPlatformDropComponent")
+
+[node name="PlayerStates" type="Node" parent="Components" node_paths=PackedStringArray("initial_state")]
+script = ExtResource("3_1vejr")
+initial_state = NodePath("Airborne")
+
+[node name="Grounded" type="Node" parent="Components/PlayerStates" node_paths=PackedStringArray("movement_component")]
+script = ExtResource("4_mybht")
+movement_component = NodePath("../../PlayerMovementComponent")
+
+[node name="Airborne" type="Node" parent="Components/PlayerStates" node_paths=PackedStringArray("movement_component")]
+script = ExtResource("5_8owo5")
+movement_component = NodePath("../../PlayerMovementComponent")
+
+[node name="PlayerCameraComponent" type="Node" parent="Components" node_paths=PackedStringArray("camera")]
+script = ExtResource("7_nbghw")
+camera = NodePath("../../PlayerCamera")
+zoom_increment = 0.1
+min_zoom = 1.0
+max_zoom = 3.0
+
+[node name="PlayerPlatformDropComponent" type="Node" parent="Components"]
+script = ExtResource("8_rblar")
+
+[node name="Hitbox" type="Area2D" parent="."]
+
+[node name="HitboxArea" type="CollisionShape2D" parent="Hitbox"]
+position = Vector2(0, -0.5)
+shape = SubResource("RectangleShape2D_jvj1l")
+debug_color = Color(0.69675, 0, 0.0947144, 0.42)
+
+[node name="PlayerCamera" type="Camera2D" parent="."]
+position = Vector2(2, 1)
+zoom = Vector2(2, 2)
